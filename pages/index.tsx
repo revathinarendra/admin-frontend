@@ -1,107 +1,4 @@
-
-// import { Box, Typography, Button, AppBar, Toolbar, Container, Grid, Paper } from "@mui/material";
-// import Link from "next/link";
-// import Image from "next/image";
-
-// export default function Home() {
-//   return (
-//     <Box>
-//       {/* Header/Navbar */}
-//       <AppBar position="static" color="primary" enableColorOnDark>
-//         <Toolbar sx={{ justifyContent: "space-between" }}>
-//           <Typography variant="h6" component="div">
-//             MyStore
-//           </Typography>
-//           <Box>
-//             <Link href="/login" passHref>
-//               <Button color="inherit" sx={{ mr: 2 }}>Login</Button>
-//             </Link>
-//             <Link href="/register" passHref>
-//               <Button variant="outlined" color="inherit">Signup</Button>
-//             </Link>
-//           </Box>
-//         </Toolbar>
-//       </AppBar>
-
-//       {/* Hero Section */}
-//       <Box
-//         sx={{
-//           position: "relative",
-//           backgroundImage: `url('/static/images/creater.jpg')`,
-//           backgroundSize: "cover",
-//           backgroundPosition: "center",
-//           height: { xs: "70vh", md: "85vh" },
-//           display: "flex",
-//           alignItems: "center",
-//           justifyContent: "center",
-//           color: "white",
-//         }}
-//       >
-//         <Box
-//           sx={{
-//             position: "absolute",
-//             inset: 0,
-//             backgroundColor: "rgba(0, 0, 0, 0.5)",
-//           }}
-//         />
-//         <Container sx={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-//           <Typography variant="h3" fontWeight="bold" gutterBottom>
-//             Welcome to MyStore
-//           </Typography>
-//           <Typography variant="h6" mb={4}>
-//             Shop the best deals, all in one place.
-//           </Typography>
-//           <Link href="/products" passHref>
-//             <Button variant="contained" size="large" color="warning">
-//               Start Shopping
-//             </Button>
-//           </Link>
-//         </Container>
-//       </Box>
-
-//       {/* Why Shop With Us */}
-//       <Box py={8} bgcolor="#f5f5f5">
-//         <Container>
-//           <Typography variant="h4" align="center" gutterBottom>
-//             Why Shop With Us?
-//           </Typography>
-//           <Grid container spacing={4} mt={4}>
-//             {[
-//               {
-//                 title: "Fast Shipping",
-//                 description: "Get your products delivered quickly and reliably.",
-//               },
-//               {
-//                 title: "Best Prices",
-//                 description: "Unbeatable prices with frequent deals and discounts.",
-//               },
-//               {
-//                 title: "24/7 Support",
-//                 description: "Customer service ready to help anytime.",
-//               },
-//             ].map((feature, index) => (
-//               <Grid item xs={12} sm={4} key={index}>
-//                 <Paper elevation={3} sx={{ p: 4, height: "100%", textAlign: "center" }}>
-//                   <Typography variant="h6" color="primary" gutterBottom>
-//                     {feature.title}
-//                   </Typography>
-//                   <Typography variant="body1" color="textSecondary">
-//                     {feature.description}
-//                   </Typography>
-//                 </Paper>
-//               </Grid>
-//             ))}
-//           </Grid>
-//         </Container>
-//       </Box>
-
-//       {/* Footer */}
-//       <Box py={3} bgcolor="primary.main" color="white" textAlign="center">
-//         <Typography variant="body2">© {new Date().getFullYear()} MyStore. All rights reserved.</Typography>
-//       </Box>
-//     </Box>
-//   );
-// }
+ //@ts-nocheck 
 import React, { useEffect, useState } from "react";
 import LoginIcon from '@mui/icons-material/Login';
 
@@ -292,11 +189,7 @@ export default function Home() {
       
 
       {/* Footer */}
-      {/* <Box py={3} bgcolor="primary.main" color="white" textAlign="center">
-        <Typography variant="body2">
-          © {new Date().getFullYear()} MyStore. All rights reserved.
-        </Typography>
-      </Box> */}
+      
       <Box py={4} textAlign="center" bgcolor="#6a1b9a" color="#ffffff">
   <Typography variant="body2">© 2025 MyStore. All rights reserved.</Typography>
 </Box>

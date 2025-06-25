@@ -1,33 +1,4 @@
-// // pages/profile/edit.tsx
-// import API from '@/utils/api';
-// import { useEffect, useState } from 'react';
 
-
-// export default function EditProfile() {
-//   const [profile, setProfile] = useState({ bio: '', location: '' });
-
-//   useEffect(() => {
-//     API.get('/userprofile/').then(res => setProfile(res.data)).catch(console.error);
-//   }, []);
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setProfile({ ...profile, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     await API.put('/profile/edit/', profile);
-//     alert('Profile updated.');
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit}>
-//       <input name="bio" value={profile.bio} onChange={handleChange} placeholder="Bio" />
-//       <input name="location" value={profile.location} onChange={handleChange} placeholder="Location" />
-//       <button type="submit">Save</button>
-//     </form>
-//   );
-// }
 // pages/profile/edit.tsx
 import { useState, useEffect } from 'react';
 import { Box, Paper, TextField, Button, Typography, Snackbar, Alert } from '@mui/material';

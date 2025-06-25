@@ -63,8 +63,8 @@ const Dashboard = () => {
     [`& .MuiDrawer-paper`]: {
       width: drawerWidth,
       boxSizing: 'border-box',
-      bgcolor: 'darkgrey', // <-- Add this line
-      color: 'white',       // Optional: better contrast for text/icons
+      bgcolor: 'darkgrey', 
+      color: 'white',       
     },
   }}
       >
@@ -72,7 +72,7 @@ const Dashboard = () => {
         <Box sx={{ overflow: 'auto' }}>
           <List>
             <Link href="/dashboard" passHref legacyBehavior>
-              <ListItem button component="a">
+              <ListItem >
                 <ListItemIcon>
                   <DashboardIcon />
                 </ListItemIcon>
@@ -81,7 +81,7 @@ const Dashboard = () => {
             </Link>
 
             <Link href="/items" passHref legacyBehavior>
-              <ListItem button component="a">
+              <ListItem >
                 <ListItemIcon>
                   <InventoryIcon />
                 </ListItemIcon>
@@ -90,7 +90,7 @@ const Dashboard = () => {
             </Link>
 
             <Link href="/cart-items" passHref legacyBehavior>
-              <ListItem button component="a">
+              <ListItem >
                 <ListItemIcon>
                   <ShoppingCartIcon />
                 </ListItemIcon>

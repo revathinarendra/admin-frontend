@@ -2,18 +2,29 @@
 import { useEffect, useState } from 'react';
 import {
   Box, Typography, Paper, TextField, Button, Grid,
-  Snackbar, Alert, Stack, IconButton, Badge
+  Stack, IconButton, Badge, Card, CardContent, Chip,
+  Container, Divider, Fab, Dialog, DialogTitle, DialogContent,
+  DialogActions, FormControl, InputLabel, Select, MenuItem,
+  Skeleton
 } from '@mui/material';
 import { useRouter } from 'next/router';
 import API from '../../utils/api';
+import { useNotification } from '@/src/context/NotificationContext';
 
 // MUI Icons
-import AddIcon from '@mui/icons-material/Add';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Inventory as InventoryIcon,
+  AddCircleOutline as AddCircleOutlineIcon,
+  RemoveCircleOutline as RemoveCircleOutlineIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+  Category as CategoryIcon,
+  AttachMoney as MoneyIcon,
+  LocalOffer as OfferIcon
+} from '@mui/icons-material';
 import Layout from '@/src/components/Layout';
 
 const ItemsPage = () => {
@@ -22,9 +33,13 @@ const ItemsPage = () => {
   const [cartQuantities, setCartQuantities] = useState<{ [key: number]: number }>({});
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('');
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { showSuccess, showError, showInfo } = useNotification();
 
   useEffect(() => {
     fetchItems();
@@ -37,6 +52,9 @@ const ItemsPage = () => {
       setItems(res.data);
     } catch (err) {
       console.error(err);
+      showError('Failed to fetch items');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,22 +71,34 @@ const ItemsPage = () => {
       setQuantities(quantitiesMap);
     } catch (err) {
       console.error(err);
+      showError('Failed to fetch cart items');
     }
   };
 
   const handleAddItem = async () => {
+    if (!title.trim() || !description.trim()) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
     try {
-      const res = await API.post('/items/', { title, description });
+      const itemData = {
+        title,
+        description,
+        price: price ? parseFloat(price) : 0,
+        category: category || 'General'
+      };
+      
+      const res = await API.post('/items/', itemData);
       setItems([...items, res.data]);
       setTitle('');
       setDescription('');
-      setSnackbar({ open: true, message: 'Item added successfully', severity: 'success' });
+      setPrice('');
+      setCategory('');
+      setOpenDialog(false);
+      showSuccess('Item added successfully');
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to add item',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to add item');
     }
   };
 
@@ -78,13 +108,9 @@ const ItemsPage = () => {
       await API.post('/cart-items/', { item: itemId, quantity });
       setCartItems([...new Set([...cartItems, itemId])]);
       setCartQuantities({ ...cartQuantities, [itemId]: quantity });
-      setSnackbar({ open: true, message: 'Cart updated!', severity: 'success' });
+      showSuccess('Cart updated successfully!');
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to update cart',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to update cart');
     }
   };
 
@@ -95,13 +121,9 @@ const ItemsPage = () => {
       const { [itemId]: _, ...updatedQuantities } = cartQuantities;
       setCartItems(updatedCart);
       setCartQuantities(updatedQuantities);
-      setSnackbar({ open: true, message: 'Item removed from cart.', severity: 'info' });
+      showInfo('Item removed from cart');
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.error || 'Failed to remove item',
-        severity: 'error',
-      });
+      showError(err.response?.data?.error || 'Failed to remove item');
     }
   };
 
@@ -119,82 +141,182 @@ const ItemsPage = () => {
     router.push('/cart-items');
   };
 
+  const categories = ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports', 'General'];
+
+  // Skeleton component for item cards
+  const ItemCardSkeleton = () => (
+    <Grid item xs={12} sm={6} md={4} lg={3}>
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Skeleton variant="text" width="70%" height={32} />
+            <Skeleton variant="circular" width={32} height={32} />
+          </Box>
+          
+          <Skeleton variant="text" width="100%" height={20} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="80%" height={20} sx={{ mb: 2 }} />
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Skeleton variant="rectangular" width={80} height={24} />
+            <Skeleton variant="rectangular" width={60} height={24} />
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="rectangular" width={70} height={40} />
+              <Skeleton variant="circular" width={32} height={32} />
+            </Box>
+
+            <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 2 }} />
+            <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 2 }} />
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+
   return (
     <Layout >
-    <Box p={4}>
-      <Typography variant="h4" gutterBottom>
-        <AddIcon sx={{ verticalAlign: 'middle', mr: 1 }} /> Items
+    <Box sx={{ 
+      py: 4, 
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', 
+      minHeight: '100vh' 
+    }}>
+      <Container maxWidth="xl">
+        {/* Header */}
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h3" fontWeight="bold" color="primary" mb={1}>
+              <InventoryIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+              Inventory Management
       </Typography>
-      <Grid container spacing={2}>
-        {/* Add Item Form */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">
-              <AddIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-              Add Item
+            <Typography variant="body1" color="text.secondary">
+              Manage your products and track inventory
             </Typography>
-            <TextField
-              fullWidth
-              label="Title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              margin="normal"
-              multiline
-            />
-            <Button variant="contained" onClick={handleAddItem} sx={{ mt: 2 }}>
-              Add Item
-            </Button>
-          </Paper>
-        </Grid>
-
-        {/* Items Display */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6">
-                <InventoryIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Your Items
-              </Typography>
-              <Badge badgeContent={cartItems.length} color="primary" showZero>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Badge badgeContent={cartItems.length} color="error" showZero>
                 <Button
                   variant="outlined"
                   onClick={handleViewCart}
                   startIcon={<ShoppingCartIcon />}
+                sx={{ borderRadius: 2 }}
                 >
                   View Cart
                 </Button>
               </Badge>
-            </Stack>
+            
+            <Button
+              variant="contained"
+              onClick={() => setOpenDialog(true)}
+              startIcon={<AddIcon />}
+              sx={{
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                },
+              }}
+            >
+              Add Item
+            </Button>
+          </Box>
+        </Box>
 
-            {items.map((item: any) => {
+        {/* Items Grid */}
+        <Grid container spacing={3}>
+          {loading ? (
+            Array.from({ length: 8 }, (_, index) => (
+              <ItemCardSkeleton key={index} />
+            ))
+          ) : items.length === 0 ? (
+            <Grid item xs={12}>
+              <Card sx={{ textAlign: 'center', py: 8 }}>
+                <CardContent>
+                  <InventoryIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h5" color="text.secondary" mb={2}>
+                    No items found
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" mb={3}>
+                    Start by adding your first item to the inventory
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => setOpenDialog(true)}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      borderRadius: 2,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                      },
+                    }}
+                  >
+                    Add First Item
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ) : (
+            items.map((item: any) => {
               const alreadyInCart = cartItems.includes(item.id);
               const quantity = quantities[item.id] || 1;
 
               return (
-                <Box
-                  key={item.id}
-                  mt={3}
-                  p={2}
-                  borderRadius={2}
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                  <Card 
                   sx={{
-                    backgroundColor: '#f8f9fa',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  }}
-                >
-                  <Typography fontWeight="bold" fontSize="1.1rem">
+                      height: '100%',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+                      },
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Typography variant="h6" fontWeight="bold" sx={{ flex: 1 }}>
                     {item.title}
                   </Typography>
-                  <Typography mb={1}>{item.description}</Typography>
+                        <IconButton size="small" color="primary">
+                          <EditIcon />
+                        </IconButton>
+                      </Box>
+                      
+                      <Typography variant="body2" color="text.secondary" mb={2} sx={{ minHeight: 40 }}>
+                        {item.description}
+                      </Typography>
 
-                  <Stack direction="row" spacing={1} alignItems="center" mt={1}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                        <Chip 
+                          icon={<CategoryIcon />}
+                          label={item.category || 'General'} 
+                          size="small" 
+                          color="primary" 
+                          variant="outlined" 
+                        />
+                        {item.price && (
+                          <Chip 
+                            icon={<MoneyIcon />}
+                            label={`$${item.price}`} 
+                            size="small" 
+                            color="success" 
+                            variant="outlined" 
+                          />
+                        )}
+                      </Box>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Stack spacing={2}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <IconButton
+                            size="small"
                       onClick={() => handleQuantityChange(item.id, quantity - 1)}
                       disabled={quantity <= 1}
                     >
@@ -212,40 +334,119 @@ const ItemsPage = () => {
                       inputProps={{ min: 1 }}
                     />
 
-                    <IconButton onClick={() => handleQuantityChange(item.id, quantity + 1)}>
+                          <IconButton 
+                            size="small"
+                            onClick={() => handleQuantityChange(item.id, quantity + 1)}
+                          >
                       <AddCircleOutlineIcon />
                     </IconButton>
+                        </Box>
 
                     <Button
                       variant="contained"
+                          fullWidth
                       onClick={() => handleAddOrUpdateToCart(item.id)}
                       disabled={alreadyInCart && !hasQuantityChanged(item.id)}
+                          sx={{ borderRadius: 2 }}
                     >
                       {alreadyInCart ? 'Update Cart' : 'Add to Cart'}
                     </Button>
 
                     {alreadyInCart && (
-                      <IconButton color="error" onClick={() => handleRemoveFromCart(item.id)}>
-                        <DeleteIcon />
-                      </IconButton>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            fullWidth
+                            onClick={() => handleRemoveFromCart(item.id)}
+                            sx={{ borderRadius: 2 }}
+                          >
+                            Remove from Cart
+                          </Button>
                     )}
                   </Stack>
-                </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
               );
-            })}
-          </Paper>
+            })
+          )}
         </Grid>
-      </Grid>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity as any} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        {/* Add Item Dialog */}
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            <Typography variant="h6" fontWeight="bold">
+              <AddIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              Add New Item
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 1 }}>
+              <TextField
+                fullWidth
+                label="Item Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+              
+              <TextField
+                fullWidth
+                label="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                multiline
+                rows={3}
+                required
+              />
+              
+              <TextField
+                fullWidth
+                label="Price"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                InputProps={{
+                  startAdornment: <MoneyIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
+              
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={category}
+                  label="Category"
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  {categories.map((cat) => (
+                    <MenuItem key={cat} value={cat}>
+                      {cat}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={() => setOpenDialog(false)} sx={{ borderRadius: 2 }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddItem} 
+              variant="contained"
+              sx={{ 
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                },
+              }}
+            >
+              Add Item
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
     </Box>
     </Layout>
   );
